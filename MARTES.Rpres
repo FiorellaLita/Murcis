@@ -1,0 +1,228 @@
+<style>
+.reveal h1, .reveal h2, .reveal h3 {
+  word-wrap: normal;
+  -moz-hyphens: none;
+}
+</style>
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+</style>
+
+Riqueza de Murcielagos en Parques Nacionales de USA
+========================================================
+author: Fiorella Gonzales G.
+date: 10/09/2018
+autosize: true
+font-family: 'Helvetica'
+
+
+Generalidades
+========================================================
+incremental: true
+left: 70%
+<small>
+
+-Originado hace casi 65 M.A
+
+-Aproximadamente 1150 especies
+
+-Rol ecosistemico principalmente 
+
+-Areas Protegidas destinadas a la preservacion 
+
+-Estados Unidos cuenta con 34 Areas Protegidas
+
+-16 especies de murcielagos</small>
+
+***
+![Phyllogeny bats](https://www.researchgate.net/profile/Jiri_Pikula/publication/262264097/figure/fig2/AS:341466565103625@1458423381601/Phylogenetic-reconstruction-of-bats-from-Europe-and-North-America-The-reconstruction-was.png)
+<small>Figura 1. Arbol filogenetico de los Murcielagos presentes en Europa y America </small>
+
+
+
+Objetivo
+========================================================
+incremental: true
+left: 70%
+
+<small>El objetivo de este trabajo es analizar la representatividad de las especies de murcielagos en el Sitema de Parques NacionaleS (NPS) de Estados Unidos de America </small>
+
+
+Hipotesis
+========================================================
+incremental: true
+left: 70%
+
+<small>-Los gradientes ambientales coinciden con la latitud, ello afecta la estructura de las comunidades.Se espera que la riqueza de murcielagos representada en el (NPS) este afectada gradientes latitudinales </small>
+
+<small>-El tamano Area Protegida y su conectividad puede aumentar los patrones de riqueza de las especies, por lo cual se espera que  Parques Nacionales (NPS) con una superficie mayor, alberguen una mayor riqueza de especies </small>
+
+***
+
+![Riqueza](http://www.elsevier.es/ficheros/publicaciones/18703453/0000008800000001/v1_201703151049/S1870345317300088/v1_201703151049/es/main.assets/gr1.jpeg)
+
+
+Metodologia
+========================================================
+incremental: true
+left: 70%
+
+<small>-Se utilizo la base de datos de la pagina [https://www.kaggle.com/nationalparkservice/park-biodiversity] </small> 
+
+<small>-Para el procesamiento de los datos se utilizo el 
+software R 3.2.2.(R Core Team 2018) </small>
+
+***
+
+![*Tadarida brasilensis*](http://batsoftexas.com/images/species/tadarida-brasiliensis.jpg)
+<small>Figura 2.*Tadaria brasilensis* "Murcielago de cola libre" </small>
+
+
+Resultados
+========================================================
+class: small-code
+incremental: true
+left: 70%
+type: exclaim
+
+~~1.Riqueza de especies~~
+<small>Se registro un total de 72 especies de murcielagos, en cinco familias: Vespertilionidae, Molossidae, Mormoopidae, Phyllostomidae, Nycteridae, en los 53 Parques Nacionales </small>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(readr)
+library(tidyverse)
+library(knitr)
+library(markdown)
+library(gridExtra)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(lubridate)
+library(broom)
+
+setwd("D:/diversidadR/AireEspa/Tarea2")
+Murcis <-read_csv("Chiroptera.csv")
+colnames(Murcis) <- make.names(colnames(Murcis))
+Murcis1 <- mutate(Murcis, Riqueza = "1")%>% select(-"X1", -"Longitude", -"Category")%>%group_by()
+Ves <- Murcis1 %>% group_by(Family) %>% summarise(n=n()) %>% rename("Riqueza"=n)
+kable(Ves)
+```
+
+<small>Tabla 1. Listado de Familias de murcielagos registradas a lo largo de los Parques Nacionales (NPS) en Estados Unidos de America </small>
+```{r}
+knitr::kable(Ves)
+
+```
+
+Resultados
+===================================
+class: small-code
+incremental: true
+left: 70%
+type: exclaim
+
+```{r, echo=FALSE}
+ggplot(Ves, aes(x = Family, y = Riqueza)) + geom_boxplot(aes(color = Family))
+```
+<small>Figura 2b. Riqueza de especies de murcielagos por cada familia </small>
+
+
+Resultados
+========================================================
+class: small-code
+incremental: true
+left: 70%
+type: exclaim
+~~2.Riqueza de especies con la latitud~~
+<small>En la Figura 1 y Figura 2 se puede ver que la riqueza de murcielagos es menor tanto hacia latitudes altas como bajas, haciendose mayor hacia latitudes medias </small>
+<small>Entre los 30^o y 50^o de latitud la diversidad es mayor </small>
+
+```{r, echo=FALSE}
+rparque <-Murcis1 %>% group_by(Latitude) %>% summarise(n=n()) %>% rename(Riqueza="n")
+
+ggplot(rparque, aes(x= Riqueza , y = Latitude)) + geom_point(color="green") + theme_classic() + stat_smooth (method = "lm", formula = y ~ I(log(x)) + x)
+
+```
+<small>Figura 2. Variacion Latitudinal 
+de la riqueza de especies de murcielagos
+presentes en los Parques Nacionales de Estados Unidos de America</small>
+
+
+
+
+Resultados
+=======================================
+class: small-code
+incremental: true
+left: 70%
+type: exclaim
+~~3.Riqueza de especies con el tamano del area~~
+
+```{r, echo=FALSE}
+aparque <-Murcis1 %>% group_by (Area) %>% summarise(n=n()) %>% rename(Riqueza=n)%>% mutate(LogArea=log(Area))
+
+ggplot(aparque, aes(x=Riqueza, y=LogArea))+geom_point(color="red")+theme_classic(base_size = 11, base_family = "")+stat_smooth (method = "lm", formula = y ~ I(log(x)) + x)+ theme_gray()
+
+
+```
+<small>Figura 3. Riqueza de especies por Area (LogArea) de los Parques Nacionales en Estados Unidos de America </small>
+
+
+
+Resultados
+==========================================
+class: small-code
+incremental: true
+left: 70%
+type: exclaim
+
+~~4. Representatividad de las especies de murcielagos por cada Parque Nacional~~
+
+De las 72 especies de murcielagos registradas, tan solo 17 estan protegidas en almenos 10 parques Nacionales. La especie mas representada para su conservacion es *Myotis lucifugus* presente en 42 Parques Nacionales 
+
+```{r}
+round(mean(Murcis$Area)) 
+```
+
+
+```{r }
+eparque <-Murcis1 %>% group_by(Park.Name, Scientific.Name) %>% summarise(n=n()) %>% rename(Riqueza=n)
+
+eparque2 <-eparque %>% group_by(Scientific.Name) %>% summarise_all(funs(sum(Riqueza))) %>% select("Scientific.Name", "Riqueza") %>% filter (Riqueza > 10) %>% mutate(Representatividad=Riqueza) %>% select(-"Riqueza")
+
+
+```
+
+
+```{r, echo=FALSE}
+eparque2 <-eparque %>% group_by(Scientific.Name) %>% summarise_all(funs(sum(Riqueza))) %>% select("Scientific.Name", "Riqueza") %>% filter (Riqueza > 10) %>% mutate(Representatividad=Riqueza) %>% select(-"Riqueza")
+
+ggplot(eparque2, aes(x=Representatividad , y=Scientific.Name))+geom_point(color="blue")+xlim(15,50)+theme_classic(base_size = 11, base_family = "")+theme_gray()
+
+```
+<small>Figura 4. Murcielagos presentes en al menos 10 PNA </small>
+
+
+Resultados
+================================
+~~5.Estado de conservacion~~
+
+<small>En la Figura 5, se puede ver que las especies de murcielagos con categorias de conservacion Amenazado (Threatened) y (Endagered) son las que estan menos representadas </small>
+
+```{r}
+conparque <-Murcis1 %>% group_by(Conservation.Status) %>% summarise(n=n()) %>% rename(Riqueza=n)
+
+```
+
+```{r, echo=FALSE}
+ggplot(conparque, aes(x=Conservation.Status, y=Riqueza))+geom_col(fill="yellow", show.legend = NA)+theme_classic(base_size = 6)+theme_classic()
+```
+<small>Figura 5. Numero de especies de murcielagos registrados en los Parques Nacionales de Estados Unidos de America de acuerdo a su categoria de conservacion </small>
+
+***
+
+
+![RedList](https://i.ytimg.com/vi/q4Wp9p9tVFc/maxresdefault.jpg)</small>
